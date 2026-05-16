@@ -38,9 +38,9 @@ five-role debate, inspect the role-by-role transcript, and process files in batc
 |:---:|:---:|
 | ![Analysis page with demo ECG/PPG](assets/screenshots/analysis.png) | ![Five-role debate transcript](assets/screenshots/debate.png) |
 
-| API & Settings | Batch Processing |
+| API & Settings | |
 |:---:|:---:|
-| ![API key configuration](assets/screenshots/settings.png) | ![Batch mode with progress](assets/screenshots/batch.png) |
+| ![API key configuration](assets/screenshots/setting.png) | |
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
