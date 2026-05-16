@@ -1,8 +1,9 @@
 # PhysioSkeptic
 
-Signal-quality-anchored skeptical reasoning for robust ECG–PPG rhythm diagnosis.
+**Signal-quality-anchored, multi-agent skeptical reasoning for robust ECG–PPG cardiac rhythm diagnosis.**
 
-> **Paper:** *PhysioSkeptic: Signal-Quality-Anchored Skeptical Reasoning for Robust ECG–PPG Rhythm Diagnosis* — AAAI 2027 (under review).
+> Code and desktop application for the accompanying paper (under review).
+> Anonymous repository — author details will be released upon acceptance.
 
 ---
 
@@ -26,6 +27,20 @@ cross-modal-conflict cases where competing methods degrade most.
 A professional desktop GUI ships with this repository. It provides a point-and-click
 interface to the full pipeline — import signals, configure any LLM backend, run the
 five-role debate, inspect the role-by-role transcript, and process files in batch.
+
+### Screenshots
+
+| Startup | Dashboard |
+|:---:|:---:|
+| ![Startup splash screen](assets/screenshots/splash.png) | ![Dashboard with KPI cards](assets/screenshots/dashboard.png) |
+
+| Analysis — Demo Signal | Debate Viewer |
+|:---:|:---:|
+| ![Analysis page with demo ECG/PPG](assets/screenshots/analysis.png) | ![Five-role debate transcript](assets/screenshots/debate.png) |
+
+| API & Settings | Batch Processing |
+|:---:|:---:|
+| ![API key configuration](assets/screenshots/settings.png) | ![Batch mode with progress](assets/screenshots/batch.png) |
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -170,7 +185,7 @@ physioskeptic/
 │   └── arbiter.yaml
 ├── scripts/
 │   ├── run_demo.py                   # CLI demo (mock backend)
-│   ├── reproduce_figures.py          # paper figure reproduction
+│   ├── reproduce_figures.py          # figure reproduction from aggregate tables
 │   ├── run_eval.py                   # batch evaluation
 │   └── make_release_zip.py
 ├── src/physioskeptic/
@@ -257,7 +272,7 @@ python scripts/run_eval.py \
 
 ## Training and distillation
 
-**PhysioPatch pre-training** (paper §3.2):
+**PhysioPatch pre-training** (see §3.2 of the accompanying paper):
 
 ```bash
 python -m physioskeptic.train_encoder \
@@ -271,7 +286,7 @@ Recipe: masked beat reconstruction (30 %) + InfoNCE ECG–PPG contrastive (τ=0.
 + supervised SQI BCE; AdamW β=(0.9, 0.999) wd=1e-4; cosine LR 10 K warmup peak 3e-4;
 200 K steps, batch 512, 8×A100 80 GB.
 
-**Student distillation** (paper §3.3, Llama-3.2-1B):
+**Student distillation** (Llama-3.2-1B student):
 
 ```bash
 python -m physioskeptic.distill_student \
@@ -299,15 +314,8 @@ Test windows clustered within patients; mean±std over 5 seeds (T=0.7).
 
 ## Citation
 
-```bibtex
-@inproceedings{physioskeptic2027,
-  title     = {PhysioSkeptic: Signal-Quality-Anchored Skeptical Reasoning
-               for Robust {ECG--PPG} Rhythm Diagnosis},
-  author    = {Anonymous},
-  booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence},
-  year      = {2027}
-}
-```
+Citation information will be provided upon paper acceptance.
+If you use this code, please check back for the official reference.
 
 ---
 
