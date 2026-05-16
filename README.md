@@ -8,15 +8,27 @@ anchored to beat-level signal quality.
 ## Quick Start
 
 ```bash
-git clone https://github.com/liuyisi123/PhysioSkeptic.git
+git clone <repository-url>
 cd PhysioSkeptic
 pip install -e .[dev]
 pytest -q
-python scripts/run_demo.py --backend mock
+python scripts/run_demo.py
 ```
 
-No API key required — the `mock` backend runs a full five-role debate locally
-and prints the final JSON result.
+No API key required. The demo generates a synthetic signal, builds a Patch Report,
+and runs a full five-role mock debate. Expected output:
+
+```json
+{
+  "route": "STANDARD",
+  "final": {
+    "rhythm": "AF_FAMILY",
+    "confidence": 0.61,
+    "review_flag": true,
+    "uncertainty": "cross_modal"
+  }
+}
+```
 
 ---
 
@@ -28,7 +40,8 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e .[dev]
 ```
 
-Python 3.9+ required. Core dependencies: `numpy`, `scipy`, `torch`.
+**Requirements:** Python 3.10+, PyTorch 2.1+ (installed automatically).
+Core dependencies: `numpy`, `scipy`, `torch`, `pyyaml`, `jsonschema`.
 
 ---
 
@@ -42,25 +55,25 @@ PhysioSkeptic/
 │   ├── patch_report.py        # deterministic beat-level JSON report
 │   ├── routing.py             # Fast / Standard / Deep adaptive routing
 │   ├── debate.py              # five-role debate pipeline
-│   ├── llm_clients.py         # pluggable API backends
+│   ├── llm_clients.py         # pluggable LLM backends
 │   ├── metrics.py             # F1, ECE, Brier, NLL, AUROC
 │   ├── corruptions.py         # GWN / BW / MA noise injection
-│   ├── train_encoder.py       # PhysioPatch pre-training
-│   └── distill_student.py     # Llama-1B student distillation
+│   ├── train_encoder.py       # PhysioPatch pre-training skeleton
+│   └── distill_student.py     # Llama-1B student distillation skeleton
 ├── prompts/                   # role-specific JSON prompt templates
 │   ├── proposer.yaml
 │   ├── checker.yaml
 │   ├── skeptic.yaml
 │   ├── advocate.yaml
 │   └── arbiter.yaml
-├── configs/default.yaml       # default hyperparameters
+├── configs/default.yaml       # hyperparameters and routing thresholds
 ├── data/
 │   ├── sample_patch_report.json    # synthetic example
-│   └── patch_report.schema.json    # JSON Schema
+│   └── patch_report.schema.json    # JSON Schema for validation
 ├── scripts/
 │   ├── run_demo.py            # CLI demo (mock backend)
 │   ├── run_eval.py            # batch evaluation
-│   └── reproduce_figures.py   # aggregate figure reproduction
+│   └── reproduce_figures.py   # figure reproduction from aggregate tables
 ├── tests/                     # 38 unit tests
 └── physioskeptic_ui/          # desktop application (see below)
 ```
@@ -69,29 +82,37 @@ PhysioSkeptic/
 
 ## Usage
 
-### Run with mock backend (no API key)
+### Mock backend (no API key)
 
 ```bash
-python scripts/run_demo.py --backend mock
+python scripts/run_demo.py
 ```
 
-### Run with a real LLM API
+### Real LLM API
 
-```bash
-export PHYSIOSKEPTIC_LLM_BACKEND=openai_compatible
-export PHYSIOSKEPTIC_API_KEY=sk-...
-python scripts/run_eval.py \
-    --config configs/default.yaml \
-    --input path/to/patch_reports.jsonl
+Set your API key in `configs/default.yaml` or pass it directly:
+
+```python
+from physioskeptic.debate import PhysioSkepticDebate
+from physioskeptic.llm_clients import OpenAICompatibleClient
+
+client = OpenAICompatibleClient(model="gpt-5.2", api_key="sk-...")
+engine = PhysioSkepticDebate(client, prompts_dir="prompts/")
+result = engine.run(patch_report)
 ```
 
 Supported providers: OpenAI, Anthropic, DeepSeek, Qwen, Azure OpenAI, Ollama (local).
+See `src/physioskeptic/llm_clients.py` for the full provider list and interface.
 
 ### Reproduce figures
 
 ```bash
 python scripts/reproduce_figures.py --outdir figures
 ```
+
+Note: this script reproduces figures from pre-computed aggregate tables included
+in the repository. Full evaluation from raw waveforms requires access to
+MIMIC-III-Ext-PPG (PhysioNet credentialed) and a configured LLM backend.
 
 ### Train the encoder
 
@@ -101,6 +122,9 @@ python -m physioskeptic.train_encoder \
     --train-jsonl /path/to/train_windows.jsonl \
     --outdir checkpoints/physiopatch
 ```
+
+`train_encoder.py` is a documented skeleton. Adapt it to your training
+infrastructure and data pipeline.
 
 ---
 
@@ -112,15 +136,16 @@ The framework expects 30-second, 125 Hz ECG–PPG windows in JSONL format:
 {
   "sample_id": "patient0001_window0001",
   "fs": 125,
-  "ecg": ["... 3750 samples ..."],
-  "ppg": ["... 3750 samples ..."],
+  "ecg": [0.01, 0.02, "... 3750 samples total ..."],
+  "ppg": [0.11, 0.10, "... 3750 samples total ..."],
   "label": "AF_FAMILY"
 }
 ```
 
-Raw waveforms are processed locally. Only derived Patch Report fields
-are submitted to LLM APIs — no raw signals or patient identifiers leave
-the local environment.
+Label values: `SR` · `STACH` · `SBRAD` · `AF_FAMILY` · `PACE`
+
+Raw waveforms are processed locally. Only derived Patch Report fields are submitted
+to LLM APIs — no raw signals or patient identifiers leave the local environment.
 
 ---
 
@@ -130,7 +155,7 @@ the local environment.
 pytest -q
 ```
 
-38 unit tests covering routing logic, patch report generation,
+38 unit tests covering routing thresholds, patch report generation,
 SQI bounds, beat confidence, and JSON schema validation.
 
 ---
@@ -138,8 +163,8 @@ SQI bounds, beat confidence, and JSON schema validation.
 ## License
 
 MIT for code.
-Dataset-specific licenses apply to any external data (e.g. MIMIC-III-Ext-PPG
-under the PhysioNet Credentialed Health Data License).
+Dataset-specific licenses apply to any external data
+(e.g. MIMIC-III-Ext-PPG under the PhysioNet Credentialed Health Data License).
 
 > **Clinical safety.** This is a research prototype. It is not a medical device
 > and must not be used for clinical decision-making.
