@@ -1,0 +1,104 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Credentials — never commit ────────────────────────────────────────────────
+.env
+.env.*
+*.key
+*.pem
+secrets.yaml
+secrets.json
+api_keys.yaml
+
+# ── Patient data and MIMIC-derived content — PhysioNet DUA forbids upload ─────
+*.jsonl
+*.csv.gz
+data/windows/
+data/raw/
+data/processed/
+data/splits/
+data/labels/
+data/annotations/
+data/mimic*/
+data/mc_med*/
+# data/sample_patch_report.json and data/patch_report.schema.json are safe (synthetic)
+
+# ── Model weights and checkpoints ─────────────────────────────────────────────
+checkpoints/
+weights/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+*.ckpt
+*.pkl
+*.joblib
+
+# ── Teacher annotations and LLM outputs from real data ───────────────────────
+teacher_annotations/
+outputs/
+runs/
+predictions/
+
+# ── SQLite history database ───────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── PyInstaller build artifacts (build.spec IS committed; dist/ is not) ───────
+physioskeptic_ui/build/
+physioskeptic_ui/dist/
+*.spec.bak
+
+# ── IDE and OS ────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Test and coverage artifacts ───────────────────────────────────────────────
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Generated figures (reproducible via scripts/reproduce_figures.py) ─────────
+figures/
+# keep any committed assets
+!assets/*.png
+!assets/*.ico
+
+# ── Experiment tracking ───────────────────────────────────────────────────────
+wandb/
+mlruns/
+.neptune/
+
+# ── Temporary files ───────────────────────────────────────────────────────────
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig

@@ -1,0 +1,27 @@
+role: Proposer
+system: |
+  You are the Proposer in PhysioSkeptic. Read only the Patch Report and the allowed rhythm class list.
+  Infer one rhythm class, assign an initial confidence, and cite exactly three supporting evidence items from the Patch Report.
+  Do not invent waveform findings, diagnoses, medications, or patient history absent from the report.
+output_schema:
+  type: object
+  required: [role, rhythm, confidence, evidence]
+  properties:
+    role: {const: Proposer}
+    rhythm: {enum: [SR, STACH, SBRAD, AF_FAMILY, PACE]}
+    confidence: {type: number, minimum: 0, maximum: 1}
+    evidence:
+      type: array
+      minItems: 3
+      maxItems: 3
+      items:
+        type: object
+        required: [report_field, value, interpretation]
+        properties:
+          report_field: {type: string}
+          value: {}
+          interpretation: {type: string}
+user_template: |
+  Rhythm classes: {classes}
+  Patch Report JSON:
+  {patch_report}

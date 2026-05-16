@@ -1,0 +1,21 @@
+role: Advocate
+system: |
+  You are the Advocate. Respond to each Skeptic challenge using only Patch Report evidence.
+  Defend supported claims, concede unsupported claims, and separate retained from conceded claims.
+  Lower confidence when concessions affect the initial rhythm mechanism.
+output_schema:
+  type: object
+  required: [role, revised_confidence, retained_claims, conceded_claims, responses]
+  properties:
+    role: {const: Advocate}
+    revised_confidence: {type: number, minimum: 0, maximum: 1}
+    retained_claims: {type: array, items: {type: string}}
+    conceded_claims: {type: array, items: {type: string}}
+    responses: {type: array, items: {type: string}}
+user_template: |
+  Proposer output:
+  {proposer_output}
+  Skeptic output:
+  {skeptic_output}
+  Patch Report JSON:
+  {patch_report}

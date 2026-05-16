@@ -1,0 +1,28 @@
+role: Skeptic
+system: |
+  You are the Skeptic. Attack the strongest Proposer evidence only when the Patch Report supports the challenge.
+  Each challenge must cite at least one beat index, time window, SQI value, spectral value, RR statistic, or P-wave statistic.
+  Issue exactly {n_chal} challenges. No hallucinated evidence is allowed.
+output_schema:
+  type: object
+  required: [role, challenges]
+  properties:
+    role: {const: Skeptic}
+    challenges:
+      type: array
+      items:
+        type: object
+        required: [target_evidence_index, strength, cited_report_fields, alternative_interpretation]
+        properties:
+          target_evidence_index: {type: integer}
+          strength: {enum: [weak, moderate, strong]}
+          cited_report_fields: {type: array, items: {type: string}}
+          alternative_interpretation: {type: string}
+user_template: |
+  n_chal: {n_chal}
+  Proposer output:
+  {proposer_output}
+  Checker output:
+  {checker_output}
+  Patch Report JSON:
+  {patch_report}

@@ -1,0 +1,57 @@
+seed: 2027
+signal:
+  fs: 125
+  duration_sec: 30
+  n_samples: 3750
+  rhythm_classes: [SR, STACH, SBRAD, AF_FAMILY, PACE]
+encoder:
+  d_model: 256
+  kernels: [5, 13, 25, 51]
+  transformer_layers: 6
+  frequency_dim: 128
+  stft:
+    window: 256
+    hop: 64
+    n_fft: 512
+    f_min: 0.5
+    f_max: 30.0
+  qformer_queries: 32
+routing:
+  fast_confidence: 0.90
+  fast_quality: 0.80
+  deep_quality: 0.50
+  deep_confidence: 0.60
+  review_confidence: 0.70
+checker_thresholds:
+  hr_diff_bpm: 5.0
+  rr_cv_irregular: 0.10
+  sinus_p_wave_ratio: 0.85
+  confidence_quality_mismatch_conf: 0.80
+  confidence_quality_mismatch_q: 0.50
+training:
+  masked_beat_ratio: 0.30
+  lambda_contrastive: 0.50
+  lambda_sqi: 0.10
+  batch_size: 512
+  pretrain_steps: 200000
+  warmup_steps: 10000
+  peak_lr: 0.0003
+  weight_decay: 0.0001
+  contrastive_temperature: 0.07
+  negative_queue: 4096
+student:
+  lora_rank: 16
+  batch_size: 64
+  epochs: 20
+  lr: 0.0002
+  alpha_ce: 1.0
+  beta_kl: 0.5
+  delta_conf: 0.3
+  delta_attention: 0.2
+llm:
+  backend: mock
+  model: gpt-5.2  # public alias used in paper experiments (OpenAI ZDR endpoint)
+  temperature: 0.7  # T=0.7 as reported in paper §4 decoding settings
+  top_p: 1.0
+  max_context_tokens: 8192
+  json_only: true

@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+title: PhysioSkeptic
+authors:
+  - name: PhysioSkeptic Authors
+version: 0.1.0
+date-released: 2027-01-01
+message: "If you use this code, please cite the PhysioSkeptic paper."

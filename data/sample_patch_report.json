@@ -1,0 +1,33 @@
+{
+  "sample_id": "demo_0001",
+  "fs": 125,
+  "duration_sec": 30,
+  "q_hat": 0.61,
+  "beat_confidences": [
+    0.72, 0.68, 0.71, 0.69, 0.74, 0.70, 0.67, 0.32,
+    0.65, 0.71, 0.69, 0.70, 0.28, 0.29, 0.30, 0.73,
+    0.68, 0.72, 0.70, 0.66, 0.71, 0.69, 0.74, 0.68,
+    0.70, 0.73, 0.67, 0.69, 0.71, 0.70
+  ],
+  "hr_ecg": 141.0,
+  "hr_ppg": 142.0,
+  "rr_cv": 0.38,
+  "p_wave_ratio": 0.31,
+  "lf_hf": 1.83,
+  "low_confidence_beats": [
+    {"beat_index": 7,  "time_window_sec": [5.1, 5.7], "confidence": 0.32, "attention": 0.68},
+    {"beat_index": 12, "time_window_sec": [8.5, 9.0], "confidence": 0.28, "attention": 0.72},
+    {"beat_index": 13, "time_window_sec": [9.0, 9.4], "confidence": 0.29, "attention": 0.71},
+    {"beat_index": 14, "time_window_sec": [9.4, 9.9], "confidence": 0.30, "attention": 0.70}
+  ],
+  "cross_signal_consistency": {
+    "hr_diff_bpm": 1.0,
+    "rhythm_morphology_conflict": true,
+    "confidence_quality_mismatch": false
+  },
+  "patch_descriptors": [
+    "rapid ventricular rate",
+    "irregular intervals",
+    "limited P-wave support"
+  ]
+}

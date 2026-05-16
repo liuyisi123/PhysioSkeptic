@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PhysioSkeptic Patch Report",
+  "description": "Structured beat-level summary from the PhysioPatch encoder (paper §3.2). Contains SQI, per-beat confidence vector, HR, RR variability, P-wave ratio, LF/HF, and cross-modal consistency cues. Raw ECG/PPG waveforms are never included.",
+  "type": "object",
+  "required": ["sample_id", "q_hat", "beat_confidences", "hr_ecg", "hr_ppg", "rr_cv", "p_wave_ratio", "lf_hf", "low_confidence_beats", "cross_signal_consistency"],
+  "properties": {
+    "sample_id": {
+      "type": "string",
+      "description": "Unique identifier for the 30-second window."
+    },
+    "fs": {
+      "type": "number",
+      "description": "Sampling frequency in Hz (125 Hz per paper)."
+    },
+    "duration_sec": {
+      "type": "number",
+      "description": "Signal duration in seconds (30 s per paper)."
+    },
+    "q_hat": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Scalar SQI estimate q̂ ∈ [0,1] from the SQI head (Eq. 2). Used for FAST/DEEP routing."
+    },
+    "beat_confidences": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0, "maximum": 1},
+      "description": "Per-beat confidence vector c ∈ [0,1]^N (paper §3.2). Length equals the number of detected beats N."
+    },
+    "hr_ecg": {
+      "type": "number",
+      "description": "Heart rate estimated from ECG R-peaks in bpm."
+    },
+    "hr_ppg": {
+      "type": "number",
+      "description": "Heart rate estimated from PPG systolic onsets in bpm."
+    },
+    "rr_cv": {
+      "type": "number",
+      "description": "RR-interval coefficient of variation (std / mean). Values > 0.10 indicate irregular rhythm."
+    },
+    "p_wave_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of beats with detectable P-wave energy (sinus-origin proxy)."
+    },
+    "lf_hf": {
+      "type": "number",
+      "description": "PPG spectral LF/HF power ratio (autonomic balance indicator, 0.04–0.15 Hz / 0.15–0.40 Hz)."
+    },
+    "low_confidence_beats": {
+      "type": "array",
+      "description": "Beats where c_i < 0.40, reported with beat index, time window, and attention weight.",
+      "items": {
+        "type": "object",
+        "required": ["beat_index", "time_window_sec", "confidence"],
+        "properties": {
+          "beat_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Zero-based index into the beat_confidences array."
+          },
+          "time_window_sec": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "[start_sec, end_sec] of the beat patch in signal time."
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Beat-level confidence c_i."
+          },
+          "attention": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Encoder attention weight (1 - c_i proxy)."
+          }
+        }
+      }
+    },
+    "cross_signal_consistency": {
+      "type": "object",
+      "description": "Cross-modal consistency flags between ECG and PPG evidence.",
+      "properties": {
+        "hr_diff_bpm": {
+          "type": "number",
+          "description": "Absolute HR difference between ECG and PPG estimates in bpm."
+        },
+        "rhythm_morphology_conflict": {
+          "type": "boolean",
+          "description": "True when rr_cv > 0.10 AND p_wave_ratio < 0.85 (irregular with weak sinus support)."
+        },
+        "confidence_quality_mismatch": {
+          "type": "boolean",
+          "description": "True when mean beat confidence > 0.80 but q̂ < 0.50."
+        }
+      }
+    },
+    "patch_descriptors": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Natural-language qualitative cues derived from numeric fields for LLM prompts."
+    }
+  }
+}

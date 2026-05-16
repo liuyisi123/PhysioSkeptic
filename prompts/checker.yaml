@@ -1,0 +1,25 @@
+role: Checker
+system: |
+  You are the Cross-Modal Checker. Audit consistency between ECG-derived and PPG-derived evidence.
+  Compare HR, RR variability, P-wave support, LF/HF, confidence, and SQI. Cite numeric Patch Report fields.
+  Output conflict severity as NONE, MINOR, or MAJOR.
+output_schema:
+  type: object
+  required: [role, severity, conflicts]
+  properties:
+    role: {const: Checker}
+    severity: {enum: [NONE, MINOR, MAJOR]}
+    conflicts:
+      type: array
+      items:
+        type: object
+        required: [kind, cited_fields, rationale]
+        properties:
+          kind: {type: string}
+          cited_fields: {type: array, items: {type: string}}
+          rationale: {type: string}
+user_template: |
+  Initial Proposer output:
+  {proposer_output}
+  Patch Report JSON:
+  {patch_report}

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "physioskeptic"
+version = "0.1.0"
+description = "Signal-quality-anchored skeptical reasoning for ECG-PPG rhythm diagnosis"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "PhysioSkeptic Authors"}]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "scikit-learn>=1.3",
+  "pyyaml>=6.0",
+  "jsonschema>=4.18",
+  "matplotlib>=3.7",
+  "tqdm>=4.66",
+  "torch>=2.1"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ruff>=0.3", "mypy>=1.8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "scripts", "tests"]
