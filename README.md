@@ -45,6 +45,22 @@ a browser. The page is self-contained and lets you change SQI, proposer
 confidence, and conflict severity while showing the resulting route and
 challenge budget. It never loads patient data or calls an external service.
 
+## Demo and paper trace
+
+The browser demo is the quickest way to inspect the paper's evidence contract:
+adjust the synthetic SQI and conflict state, then follow the route, challenge
+budget, and review flag through the five roles. It is deliberately illustrative
+and deterministic; the executable mock pipeline is the authoritative local
+smoke test.
+
+| Paper concept | Code entry point |
+| --- | --- |
+| Patch Report schema and validation | [patch_report.py](src/physioskeptic/patch_report.py), [patch_report.schema.json](data/patch_report.schema.json) |
+| FAST / STANDARD / DEEP routing | [routing.py](src/physioskeptic/routing.py) |
+| Five-role transcript | [debate.py](src/physioskeptic/debate.py), [prompts](prompts/) |
+| Synthetic end-to-end run | [run_demo.py](scripts/run_demo.py) |
+| Aggregate-figure contract | [reproduce_figures.py](scripts/reproduce_figures.py), [experiments README](experiments/README.md) |
+
 ## Repository map
 
 ```text
@@ -139,6 +155,11 @@ Before committing, verify that no raw waveform, credential, model checkpoint,
 provider response, or generated patient artifact is staged. The `.gitignore`
 contains explicit rules for these classes of files, but the final review is
 still manual.
+
+The release review is intentionally conservative: tracked files are limited to
+source code, synthetic schemas/examples, prompts, tests, documentation, and
+non-sensitive UI assets. Restricted waveforms, patient-level manifests,
+checkpoints, provider transcripts, and credentials remain excluded from Git.
 
 ## License and citation
 

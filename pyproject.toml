@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "physioskeptic"
 version = "0.1.0"
-description = "Signal-quality-anchored skeptical reasoning for ECG-PPG rhythm diagnosis"
+description = "Signal-quality-anchored skeptical reasoning for ECG-PPG rhythm classification"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [{name = "PhysioSkeptic Authors"}]
 dependencies = [
   "numpy>=1.24",
