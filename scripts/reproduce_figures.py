@@ -101,6 +101,19 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--outdir", default="figures")
     args = p.parse_args()
+    required = [
+        ROOT / "experiments/main_results.csv",
+        ROOT / "experiments/ablations.csv",
+        ROOT / "experiments/robustness.csv",
+        ROOT / "experiments/backbone_transfer.csv",
+        ROOT / "experiments/routing_deployment.csv",
+    ]
+    missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
+    if missing:
+        raise SystemExit(
+            "Aggregate tables are not included in this release. Recreate these "
+            "author-local files after an approved evaluation: " + ", ".join(missing)
+        )
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     save_main(outdir)

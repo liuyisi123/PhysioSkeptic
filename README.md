@@ -1,214 +1,148 @@
 # PhysioSkeptic
 
-Multi-agent LLM debate framework for ECG–PPG cardiac rhythm diagnosis,
-anchored to beat-level signal quality.
+PhysioSkeptic is a research framework for ECG--PPG rhythm classification with
+beat-level signal-quality evidence and adaptive skeptical reasoning. The
+repository separates local signal processing from the serialized Patch Report
+sent to an optional language-model backend.
 
----
+> Research prototype. This repository is not a medical device, diagnostic
+> system, or source of clinical advice. The synthetic demo is an API and
+> workflow demonstration, not a clinical prediction.
 
-## Quick Start
+## What is included
 
-```bash
-git clone <repository-url>
-cd PhysioSkeptic
-pip install -e .[dev]
-pytest -q
-python scripts/run_demo.py
-```
+The release contains the reproducible software contracts used by the paper:
 
-No API key required. The demo generates a synthetic signal, builds a Patch Report,
-and runs a full five-role mock debate. Expected output:
+- cardiac landmark detection and deterministic Patch Report construction;
+- PhysioPatch's dual-path encoder and SQI head interfaces;
+- FAST, STANDARD, and DEEP routing with the paper's threshold policy;
+- Proposer, Checker, Skeptic, Advocate, and Arbiter prompt contracts;
+- a mock-backend CLI and a browser-only interactive demo;
+- unit tests for Patch Report validation, routing boundaries, and challenge count;
+- plotting utilities that consume checked aggregate tables when those tables are
+  available locally.
 
-```json
-{
-  "route": "STANDARD",
-  "final": {
-    "rhythm": "AF_FAMILY",
-    "confidence": 0.61,
-    "review_flag": true,
-    "uncertainty": "cross_modal"
-  }
-}
-```
+Raw MIMIC-III-Ext-PPG or MC-MED files, patient-level manifests, checkpoints,
+API credentials, and private provider responses are intentionally excluded.
 
----
+## Start here
 
-## Installation
-
-```bash
+```powershell
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e .[dev]
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+python -m pytest -q
+python scripts\run_demo.py
 ```
 
-**Requirements:** Python 3.10+, PyTorch 2.1+ (installed automatically).
-Core dependencies: `numpy`, `scipy`, `torch`, `pyyaml`, `jsonschema`.
+The CLI demo creates a fully synthetic 30-second ECG--PPG window and runs the
+mock five-role pipeline. It requires no API key and prints the Patch Report,
+route, structured transcript, and final review flag.
 
----
+For a visual walkthrough, open [`demo/index.html`](demo/index.html) directly in
+a browser. The page is self-contained and lets you change SQI, proposer
+confidence, and conflict severity while showing the resulting route and
+challenge budget. It never loads patient data or calls an external service.
 
-## Repository Layout
+## Repository map
 
-```
+```text
 PhysioSkeptic/
-├── src/physioskeptic/
-│   ├── signal_processing.py   # bandpass filter, R-peak detection, SQI
-│   ├── encoder.py             # PhysioPatch dual-path encoder + Q-Former
-│   ├── patch_report.py        # deterministic beat-level JSON report
-│   ├── routing.py             # Fast / Standard / Deep adaptive routing
-│   ├── debate.py              # five-role debate pipeline
-│   ├── llm_clients.py         # pluggable LLM backends
-│   ├── metrics.py             # F1, ECE, Brier, NLL, AUROC
-│   ├── corruptions.py         # GWN / BW / MA noise injection
-│   ├── train_encoder.py       # PhysioPatch pre-training skeleton
-│   └── distill_student.py     # Llama-1B student distillation skeleton
-├── prompts/                   # role-specific JSON prompt templates
-│   ├── proposer.yaml
-│   ├── checker.yaml
-│   ├── skeptic.yaml
-│   ├── advocate.yaml
-│   └── arbiter.yaml
-├── configs/default.yaml       # hyperparameters and routing thresholds
-├── data/
-│   ├── sample_patch_report.json    # synthetic example
-│   └── patch_report.schema.json    # JSON Schema for validation
-├── scripts/
-│   ├── run_demo.py            # CLI demo (mock backend)
-│   ├── run_eval.py            # batch evaluation
-│   └── reproduce_figures.py   # figure reproduction from aggregate tables
-├── tests/                     # 38 unit tests
-└── physioskeptic_ui/          # desktop application (see below)
+├── src/physioskeptic/       # package: signal, encoder, report, routing, debate
+├── prompts/                 # five JSON-output role contracts
+├── configs/default.yaml     # paper-aligned dimensions and thresholds
+├── data/                    # schema and synthetic Patch Report only
+├── demo/                    # self-contained browser demo and notes
+├── scripts/                 # demo, evaluation, release, and plot utilities
+├── tests/                   # unit tests
+├── docs/                    # data and reproducibility boundaries
+├── experiments/             # local-only aggregate-table contract
+└── physioskeptic_ui/        # optional PySide6 desktop interface
 ```
 
----
+The package is deliberately small: `patch_report.py` forms the evidence
+interface, `routing.py` implements the SQI gates, and `debate.py` orchestrates
+the role sequence. `llm_clients.py` provides the mock and provider adapters;
+provider calls are opt-in.
 
-## Usage
+## Running the software
 
-### Mock backend (no API key)
+### Synthetic CLI
 
-```bash
-python scripts/run_demo.py
+```powershell
+python scripts\run_demo.py
 ```
 
-### Real LLM API
+### Patch Report batch evaluation
 
-Set your API key in `configs/default.yaml` or pass it directly:
-
-```python
-from physioskeptic.debate import PhysioSkepticDebate
-from physioskeptic.llm_clients import OpenAICompatibleClient
-
-client = OpenAICompatibleClient(model="gpt-5.2", api_key="sk-...")
-engine = PhysioSkepticDebate(client, prompts_dir="prompts/")
-result = engine.run(patch_report)
+```powershell
+python scripts\run_eval.py `
+  --input C:\path\to\patch_reports.jsonl `
+  --output outputs\predictions.jsonl
 ```
 
-Supported providers: OpenAI, Anthropic, DeepSeek, Qwen, Azure OpenAI, Ollama (local).
-See `src/physioskeptic/llm_clients.py` for the full provider list and interface.
+The input must contain validated Patch Report JSON objects. Keep real outputs
+outside the repository; `outputs/` is ignored by Git.
 
-### Reproduce figures
+### Optional provider backend
 
-```bash
-python scripts/reproduce_figures.py --outdir figures
+The provider adapter accepts an API-compatible client, but credentials must be
+provided through a local secret manager or environment variable. Never place a
+key in `configs/default.yaml`, prompts, notebooks, logs, or source files. Only
+the derived Patch Report should cross the provider boundary; raw waveforms and
+identifiers should remain local.
+
+### Optional desktop UI
+
+The PySide6 application is kept separate from the research package:
+
+```powershell
+python -m pip install -r physioskeptic_ui\requirements.txt
+python physioskeptic_ui\main.py
 ```
 
-Note: this script reproduces figures from pre-computed aggregate tables included
-in the repository. Full evaluation from raw waveforms requires access to
-MIMIC-III-Ext-PPG (PhysioNet credentialed) and a configured LLM backend.
+Use the Mock / Demo path for a no-credential smoke test. The UI is an
+experimental convenience layer and is not required for the paper pipeline.
 
-### Train the encoder
+## Data and evaluation boundaries
 
-```bash
-python -m physioskeptic.train_encoder \
-    --config configs/default.yaml \
-    --train-jsonl /path/to/train_windows.jsonl \
-    --outdir checkpoints/physiopatch
+MIMIC-III-Ext-PPG and MC-MED are credentialed or restricted resources. Obtain
+them directly from their approved distribution channels and keep all waveform
+files, manifests, and derived patient-level artifacts outside this repository.
+The checked-in JSON schema and sample report are synthetic. See
+[`data/README.md`](data/README.md) and
+[`docs/reproducibility.md`](docs/reproducibility.md) before running an
+evaluation.
+
+The figure helper in `scripts/reproduce_figures.py` expects paper aggregate
+tables under `experiments/` that are not included in this release. This keeps
+restricted or author-local evaluation artifacts out of the repository while
+preserving the plotting entry point and its expected file contract.
+
+## Figures and manuscript
+
+The ICLR-27 LaTeX source, combined PDF, bibliography audit, and migration log
+are delivered alongside this code under `../../ICLR2027/`. The repository
+contains the executable code and the synthetic demo; the manuscript delivery
+contains the paper assets and their provenance record.
+
+## Testing and release hygiene
+
+```powershell
+python -m pytest -q
+python -m build                 # optional package build
+git status --short
 ```
 
-`train_encoder.py` is a documented skeleton. Adapt it to your training
-infrastructure and data pipeline.
+Before committing, verify that no raw waveform, credential, model checkpoint,
+provider response, or generated patient artifact is staged. The `.gitignore`
+contains explicit rules for these classes of files, but the final review is
+still manual.
 
----
+## License and citation
 
-## Data
-
-The framework expects 30-second, 125 Hz ECG–PPG windows in JSONL format:
-
-```json
-{
-  "sample_id": "patient0001_window0001",
-  "fs": 125,
-  "ecg": [0.01, 0.02, "... 3750 samples total ..."],
-  "ppg": [0.11, 0.10, "... 3750 samples total ..."],
-  "label": "AF_FAMILY"
-}
-```
-
-Label values: `SR` · `STACH` · `SBRAD` · `AF_FAMILY` · `PACE`
-
-Raw waveforms are processed locally. Only derived Patch Report fields are submitted
-to LLM APIs — no raw signals or patient identifiers leave the local environment.
-
----
-
-## Tests
-
-```bash
-pytest -q
-```
-
-38 unit tests covering routing thresholds, patch report generation,
-SQI bounds, beat confidence, and JSON schema validation.
-
----
-
-## License
-
-MIT for code.
-Dataset-specific licenses apply to any external data
-(e.g. MIMIC-III-Ext-PPG under the PhysioNet Credentialed Health Data License).
-
-> **Clinical safety.** This is a research prototype. It is not a medical device
-> and must not be used for clinical decision-making.
-
----
-
-## Citation
-
-Citation information will be provided upon paper acceptance.
-
----
-
-## Desktop Application
-
-A PySide6 desktop GUI is included in `physioskeptic_ui/`.
-It supports signal import, multi-provider API configuration,
-single and batch analysis, and a role-by-role debate viewer.
-
-### Run from source
-
-```bash
-cd physioskeptic_ui
-pip install PySide6 pyqtgraph numpy scipy
-python main.py
-```
-
-Select **Mock / Demo** in the model dropdown to run without an API key.
-
-### Windows executable
-
-Download `PhysioSkeptic.exe` from
-[Releases](https://github.com/liuyisi123/PhysioSkeptic/releases/latest)
-— no Python installation required.
-
-### Screenshots
-
-| Startup | Dashboard |
-|:---:|:---:|
-| ![Splash screen](assets/screenshots/splash.png) | ![Dashboard](assets/screenshots/dashboard.png) |
-
-| Analysis | Debate Viewer |
-|:---:|:---:|
-| ![Analysis with demo signal](assets/screenshots/analysis.png) | ![Five-role debate](assets/screenshots/debate.png) |
-
-| Settings & API |
-|:---:|
-| ![API configuration](assets/screenshots/setting.png) |
+Code is released under the MIT License. Dataset, checkpoint, and provider
+licenses remain separate. Citation metadata is in [`CITATION.cff`](CITATION.cff);
+the final paper citation should replace the placeholder bibliographic record
+before public release.
