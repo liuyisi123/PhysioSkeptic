@@ -3,5 +3,9 @@ title: PhysioSkeptic
 authors:
   - name: PhysioSkeptic Authors
 version: 0.1.0
-date-released: 2027-01-01
+repository-code: https://github.com/liuyisi123/PhysioSkeptic
+license: MIT
+abstract: >-
+  Beat-level signal-quality evidence for ECG-PPG rhythm classification and
+  adaptive skeptical reasoning.
 message: "If you use this code, please cite the PhysioSkeptic paper."

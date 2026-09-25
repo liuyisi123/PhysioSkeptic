@@ -5,11 +5,20 @@
 </p>
 
 <p align="center">
-  <a href=".github/workflows/tests.yml"><img src="https://img.shields.io/badge/CI-unit%20tests-0e948d.svg" alt="CI unit tests"></a>
+  <a href="https://github.com/liuyisi123/PhysioSkeptic/actions/workflows/tests.yml"><img src="https://github.com/liuyisi123/PhysioSkeptic/actions/workflows/tests.yml/badge.svg?branch=main" alt="CI status"></a>
+  <a href="https://github.com/liuyisi123/PhysioSkeptic"><img src="https://img.shields.io/badge/code-private%20research%20release-0e948d.svg" alt="Private research release"></a>
   <img src="https://img.shields.io/badge/release-v0.1.0-2563eb.svg" alt="release v0.1.0">
   <img src="https://img.shields.io/badge/license-MIT-0f766e.svg" alt="MIT license">
   <img src="https://img.shields.io/badge/python-3.10%2B-3776ab.svg" alt="Python 3.10 or newer">
   <img src="https://img.shields.io/badge/status-research%20prototype-d97706.svg" alt="research prototype">
+</p>
+
+<p align="center">
+  <a href="#method-at-a-glance">Method</a> ·
+  <a href="#demo-and-paper-trace">Demo</a> ·
+  <a href="#running-the-software">Run locally</a> ·
+  <a href="docs/reproducibility.md">Reproducibility</a> ·
+  <a href="CITATION.cff">Citation</a>
 </p>
 
 > Beat-level signal-quality evidence for ECG--PPG rhythm classification and
@@ -32,9 +41,9 @@ The release contains the reproducible software contracts used by the paper:
 - two self-contained synthetic GIF walkthroughs of the evidence-to-review flow;
 - unit tests for Patch Report validation, routing boundaries, and challenge count;
 
-The repository does not contain paper figures, plotting scripts, raw
-MIMIC-III-Ext-PPG or MC-MED files, patient-level manifests, checkpoints, API
-credentials, or private provider responses.
+The release tracks the executable contracts and synthetic fixtures needed to
+inspect the method. Restricted waveforms, patient-level manifests, checkpoints,
+credentials, and provider responses stay in the local evaluation environment.
 
 ## Start here
 
@@ -73,13 +82,31 @@ budget, and review flag through the five roles. It is deliberately illustrative
 and deterministic; the executable mock pipeline is the authoritative local
 smoke test.
 
+## Method at a glance
+
+```text
+ECG + PPG
+   -> cardiac landmarks and beat patches
+   -> PhysioPatch encoder + SQI estimates
+   -> structured Patch Report
+   -> FAST / STANDARD / DEEP routing
+   -> Proposer -> Checker -> Skeptic -> Advocate -> Arbiter
+   -> class probabilities + review flag + evidence trace
+```
+
+The central software boundary is the Patch Report: local signal processing
+produces beat-indexed features and quality values, while the reasoning layer
+consumes a compact, auditable JSON contract. The mock backend exercises this
+boundary without network access.
+
 | Paper concept | Code entry point |
 | --- | --- |
 | Patch Report schema and validation | [patch_report.py](src/physioskeptic/patch_report.py), [patch_report.schema.json](data/patch_report.schema.json) |
 | FAST / STANDARD / DEEP routing | [routing.py](src/physioskeptic/routing.py) |
 | Five-role transcript | [debate.py](src/physioskeptic/debate.py), [prompts](prompts/) |
 | Synthetic end-to-end run | [run_demo.py](scripts/run_demo.py) |
-| Aggregate results contract | [experiments README](experiments/README.md) |
+| Configuration and thresholds | [default.yaml](configs/default.yaml) |
+| Aggregate-results contract | [experiments README](experiments/README.md) |
 
 ## Repository map
 
@@ -173,6 +200,5 @@ kept outside the repository.
 ## License and citation
 
 Code is released under the MIT License. Dataset, checkpoint, and provider
-licenses remain separate. Citation metadata is in [`CITATION.cff`](CITATION.cff);
-the final paper citation should replace the placeholder bibliographic record
-before public release.
+licenses remain separate. Machine-readable citation metadata is in
+[`CITATION.cff`](CITATION.cff).

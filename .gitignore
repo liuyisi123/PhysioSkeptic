@@ -87,7 +87,7 @@ htmlcov/
 *.log
 logs/
 
-# ── Generated figures (reproducible via scripts/reproduce_figures.py) ─────────
+# ── Local generated figures and plots ─────────────────────────────────────────
 figures/
 # keep any committed assets
 !assets/*.png

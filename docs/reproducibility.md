@@ -19,12 +19,13 @@ only for the transfer and weak-label audits described in the paper. These
 resources must remain outside Git, together with patient-level splits,
 provider responses, checkpoints, and logs.
 
-## Aggregate plotting
+## Aggregate evaluation outputs
 
-`scripts/reproduce_figures.py` expects the aggregate CSV files named in the
-script. The release does not ship those files because they are derived from
-restricted or author-local runs. Recreate them in a local `experiments/`
-directory and verify their provenance before generating plots.
+The release does not bundle paper plotting code or aggregate result files.
+Author-local tables belong in `experiments/` and remain outside version control;
+the directory README records the expected contract. For a validated JSONL of
+Patch Reports, `scripts/run_eval.py` produces deterministic mock-backend
+predictions without requiring restricted waveforms or model checkpoints.
 
 ## Provider boundary
 
