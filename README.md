@@ -20,10 +20,6 @@ beat-level signal-quality evidence and adaptive skeptical reasoning. The
 repository separates local signal processing from the serialized Patch Report
 sent to an optional language-model backend.
 
-> Research prototype. This repository is not a medical device, diagnostic
-> system, or source of clinical advice. The synthetic demo is an API and
-> workflow demonstration, not a clinical prediction.
-
 ## What is included
 
 The release contains the reproducible software contracts used by the paper:
@@ -33,7 +29,7 @@ The release contains the reproducible software contracts used by the paper:
 - FAST, STANDARD, and DEEP routing with the paper's threshold policy;
 - Proposer, Checker, Skeptic, Advocate, and Arbiter prompt contracts;
 - a mock-backend CLI and a browser-only interactive demo;
-- a self-contained synthetic GIF walkthrough of the evidence-to-review flow;
+- two self-contained synthetic GIF walkthroughs of the evidence-to-review flow;
 - unit tests for Patch Report validation, routing boundaries, and challenge count;
 
 The repository does not contain paper figures, plotting scripts, raw
@@ -55,14 +51,21 @@ The CLI demo creates a fully synthetic 30-second ECG--PPG window and runs the
 mock five-role pipeline. It requires no API key and prints the Patch Report,
 route, structured transcript, and final review flag.
 
-For a visual walkthrough, open the synthetic
-[`demo GIF`](assets/demo/physioskeptic_demo.gif). For an interactive version,
-open [`demo/index.html`](demo/index.html) directly in a browser. The page is
-self-contained and lets you change SQI, proposer confidence, and conflict
-severity while showing the resulting route and challenge budget. Neither demo
-loads patient data or calls an external service.
+For a visual walkthrough, open either synthetic GIF. For an interactive version,
+open [`demo/index.html`](demo/index.html) directly in a browser. The page lets
+you change SQI, proposer confidence, and conflict severity while showing the
+resulting route and challenge budget.
 
 ## Demo and paper trace
+
+<p align="center">
+  <img src="assets/demo/physioskeptic_demo.gif" alt="Synthetic routing demo" width="47%">
+  <img src="assets/demo/physioskeptic_reasoning_trace.gif" alt="Synthetic evidence trace" width="47%">
+</p>
+
+The first animation follows the route and challenge budget. The second traces
+how beat-level ECG--PPG evidence moves through cross-modal checking, skeptical
+challenge, and confidence revision.
 
 The browser demo is the quickest way to inspect the paper's evidence contract:
 adjust the synthetic SQI and conflict state, then follow the route, challenge
@@ -140,17 +143,13 @@ experimental convenience layer and is not required for the paper pipeline.
 
 ## Data and evaluation boundaries
 
-MIMIC-III-Ext-PPG and MC-MED are credentialed or restricted resources. Obtain
-them directly from their approved distribution channels and keep all waveform
-files, manifests, and derived patient-level artifacts outside this repository.
-The checked-in JSON schema and sample report are synthetic. See
+MIMIC-III-Ext-PPG and MC-MED are credentialed or restricted resources. The
+checked-in JSON schema and sample report are synthetic fixtures; evaluation
+waveforms, manifests, and patient-level artifacts stay in the local evaluation
+environment. See
 [`data/README.md`](data/README.md) and
 [`docs/reproducibility.md`](docs/reproducibility.md) before running an
 evaluation.
-
-The checked-in JSON schema and sample report are synthetic interface fixtures,
-not study data. Author-local aggregate tables, figures, and evaluation outputs
-remain outside this repository.
 
 ## Figures and manuscript
 
@@ -167,15 +166,9 @@ python -m build                 # optional package build
 git status --short
 ```
 
-Before committing, verify that no raw waveform, credential, model checkpoint,
-provider response, paper figure, or generated patient artifact is staged. The
-`.gitignore` contains explicit rules for these classes of files, but the final
-review is still manual.
-
-The release review is intentionally conservative: tracked files are limited to
-source code, synthetic schemas/examples, prompts, tests, documentation, and
-non-sensitive UI assets. Restricted waveforms, patient-level manifests,
-checkpoints, provider transcripts, and credentials remain excluded from Git.
+The tracked release contains source code, synthetic schemas/examples, prompts,
+tests, documentation, and UI assets. Evaluation outputs and model artifacts are
+kept outside the repository.
 
 ## License and citation
 
