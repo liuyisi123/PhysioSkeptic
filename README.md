@@ -1,5 +1,20 @@
 # PhysioSkeptic
 
+<p align="center">
+  <img src="assets/physioskeptic-logo.svg" alt="PhysioSkeptic" width="620">
+</p>
+
+<p align="center">
+  <a href=".github/workflows/tests.yml"><img src="https://img.shields.io/badge/CI-unit%20tests-0e948d.svg" alt="CI unit tests"></a>
+  <img src="https://img.shields.io/badge/release-v0.1.0-2563eb.svg" alt="release v0.1.0">
+  <img src="https://img.shields.io/badge/license-MIT-0f766e.svg" alt="MIT license">
+  <img src="https://img.shields.io/badge/python-3.10%2B-3776ab.svg" alt="Python 3.10 or newer">
+  <img src="https://img.shields.io/badge/status-research%20prototype-d97706.svg" alt="research prototype">
+</p>
+
+> Beat-level signal-quality evidence for ECG--PPG rhythm classification and
+> adaptive skeptical reasoning.
+
 PhysioSkeptic is a research framework for ECG--PPG rhythm classification with
 beat-level signal-quality evidence and adaptive skeptical reasoning. The
 repository separates local signal processing from the serialized Patch Report
@@ -18,12 +33,12 @@ The release contains the reproducible software contracts used by the paper:
 - FAST, STANDARD, and DEEP routing with the paper's threshold policy;
 - Proposer, Checker, Skeptic, Advocate, and Arbiter prompt contracts;
 - a mock-backend CLI and a browser-only interactive demo;
+- a self-contained synthetic GIF walkthrough of the evidence-to-review flow;
 - unit tests for Patch Report validation, routing boundaries, and challenge count;
-- plotting utilities that consume checked aggregate tables when those tables are
-  available locally.
 
-Raw MIMIC-III-Ext-PPG or MC-MED files, patient-level manifests, checkpoints,
-API credentials, and private provider responses are intentionally excluded.
+The repository does not contain paper figures, plotting scripts, raw
+MIMIC-III-Ext-PPG or MC-MED files, patient-level manifests, checkpoints, API
+credentials, or private provider responses.
 
 ## Start here
 
@@ -40,10 +55,12 @@ The CLI demo creates a fully synthetic 30-second ECG--PPG window and runs the
 mock five-role pipeline. It requires no API key and prints the Patch Report,
 route, structured transcript, and final review flag.
 
-For a visual walkthrough, open [`demo/index.html`](demo/index.html) directly in
-a browser. The page is self-contained and lets you change SQI, proposer
-confidence, and conflict severity while showing the resulting route and
-challenge budget. It never loads patient data or calls an external service.
+For a visual walkthrough, open the synthetic
+[`demo GIF`](assets/demo/physioskeptic_demo.gif). For an interactive version,
+open [`demo/index.html`](demo/index.html) directly in a browser. The page is
+self-contained and lets you change SQI, proposer confidence, and conflict
+severity while showing the resulting route and challenge budget. Neither demo
+loads patient data or calls an external service.
 
 ## Demo and paper trace
 
@@ -59,7 +76,7 @@ smoke test.
 | FAST / STANDARD / DEEP routing | [routing.py](src/physioskeptic/routing.py) |
 | Five-role transcript | [debate.py](src/physioskeptic/debate.py), [prompts](prompts/) |
 | Synthetic end-to-end run | [run_demo.py](scripts/run_demo.py) |
-| Aggregate-figure contract | [reproduce_figures.py](scripts/reproduce_figures.py), [experiments README](experiments/README.md) |
+| Aggregate results contract | [experiments README](experiments/README.md) |
 
 ## Repository map
 
@@ -70,7 +87,7 @@ PhysioSkeptic/
 ├── configs/default.yaml     # paper-aligned dimensions and thresholds
 ├── data/                    # schema and synthetic Patch Report only
 ├── demo/                    # self-contained browser demo and notes
-├── scripts/                 # demo, evaluation, release, and plot utilities
+├── scripts/                 # demo, evaluation, and release utilities
 ├── tests/                   # unit tests
 ├── docs/                    # data and reproducibility boundaries
 ├── experiments/             # local-only aggregate-table contract
@@ -131,17 +148,16 @@ The checked-in JSON schema and sample report are synthetic. See
 [`docs/reproducibility.md`](docs/reproducibility.md) before running an
 evaluation.
 
-The figure helper in `scripts/reproduce_figures.py` expects paper aggregate
-tables under `experiments/` that are not included in this release. This keeps
-restricted or author-local evaluation artifacts out of the repository while
-preserving the plotting entry point and its expected file contract.
+The checked-in JSON schema and sample report are synthetic interface fixtures,
+not study data. Author-local aggregate tables, figures, and evaluation outputs
+remain outside this repository.
 
 ## Figures and manuscript
 
 The ICLR-27 LaTeX source, combined PDF, bibliography audit, and migration log
-are delivered alongside this code under `../../ICLR2027/`. The repository
-contains the executable code and the synthetic demo; the manuscript delivery
-contains the paper assets and their provenance record.
+are delivered separately from this software repository. This repository keeps
+only the executable contracts and synthetic demonstrations needed to inspect
+the method boundary.
 
 ## Testing and release hygiene
 
@@ -152,9 +168,9 @@ git status --short
 ```
 
 Before committing, verify that no raw waveform, credential, model checkpoint,
-provider response, or generated patient artifact is staged. The `.gitignore`
-contains explicit rules for these classes of files, but the final review is
-still manual.
+provider response, paper figure, or generated patient artifact is staged. The
+`.gitignore` contains explicit rules for these classes of files, but the final
+review is still manual.
 
 The release review is intentionally conservative: tracked files are limited to
 source code, synthetic schemas/examples, prompts, tests, documentation, and
