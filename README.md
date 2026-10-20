@@ -197,8 +197,3 @@ The tracked release contains source code, synthetic schemas/examples, prompts,
 tests, documentation, and UI assets. Evaluation outputs and model artifacts are
 kept outside the repository.
 
-## License and citation
-
-Code is released under the MIT License. Dataset, checkpoint, and provider
-licenses remain separate. Machine-readable citation metadata is in
-[`CITATION.cff`](CITATION.cff).
