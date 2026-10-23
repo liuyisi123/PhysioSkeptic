@@ -107,7 +107,7 @@ class Sidebar(QFrame):
         name_row.addWidget(self._collapse_btn)
         logo_lay.addLayout(name_row)
 
-        self._logo_tag = QLabel("SQI-Anchored Rhythm Diagnosis")
+        self._logo_tag = QLabel("Physiological agent review demo")
         self._logo_tag.setObjectName("SidebarTagline")
         logo_lay.addWidget(self._logo_tag)
 
@@ -154,7 +154,7 @@ class Sidebar(QFrame):
         outer.addStretch()
 
         # ── bottom: version ────────────────────────────────────────────────
-        ver = QLabel("v 1.0.0  ·  Research only")
+        ver = QLabel("Prototype · Illustrative metrics")
         ver.setObjectName("SidebarVersion")
         ver.setContentsMargins(14, 0, 0, 10)
         outer.addWidget(ver)

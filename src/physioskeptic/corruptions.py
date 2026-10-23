@@ -1,4 +1,4 @@
-"""Controlled signal corruption utilities for robustness experiments (paper §4.3).
+"""Controlled signal corruption utilities for robustness experiments.
 
 Implements three corruption families applied to ECG/PPG windows at multiple severity
 levels to evaluate model robustness under realistic acquisition artifacts:

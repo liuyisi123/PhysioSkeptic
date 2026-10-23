@@ -401,15 +401,10 @@ class SettingsPage(QWidget):
     def _save_settings(self) -> None:
         s = self._settings
 
-        # API keys
-        s.setValue("api/openai_key", self._openai_key.text())
+        # Persist preferences, not credentials. Keys remain session-local.
         s.setValue("api/openai_org", self._openai_org.text())
-        s.setValue("api/anthropic_key", self._anthropic_key.text())
-        s.setValue("api/deepseek_key", self._deepseek_key.text())
-        s.setValue("api/qwen_key", self._qwen_key.text())
         s.setValue("api/ollama_url", self._ollama_url.text())
         s.setValue("api/azure_endpoint", self._azure_endpoint.text())
-        s.setValue("api/azure_key", self._azure_key.text())
         s.setValue("api/azure_version", self._azure_version.text())
 
         # Model defaults
@@ -438,20 +433,20 @@ class SettingsPage(QWidget):
         s.setValue("appearance/sidebar_collapsed", self._sidebar_collapsed.isChecked())
 
         s.sync()
-        self._status_lbl.setText("Settings saved.")
+        self._status_lbl.setText("Preferences saved. API keys are used for this session only.")
         self._status_lbl.setStyleSheet(f"color: {SUCCESS};")
 
     def _load_settings(self) -> None:
         s = self._settings
 
-        self._openai_key.setText(s.value("api/openai_key", ""))
+        self._openai_key.setText(os.environ.get("OPENAI_API_KEY", ""))
         self._openai_org.setText(s.value("api/openai_org", ""))
-        self._anthropic_key.setText(s.value("api/anthropic_key", ""))
-        self._deepseek_key.setText(s.value("api/deepseek_key", ""))
-        self._qwen_key.setText(s.value("api/qwen_key", ""))
+        self._anthropic_key.setText(os.environ.get("ANTHROPIC_API_KEY", ""))
+        self._deepseek_key.setText(os.environ.get("DEEPSEEK_API_KEY", ""))
+        self._qwen_key.setText(os.environ.get("DASHSCOPE_API_KEY", ""))
         self._ollama_url.setText(s.value("api/ollama_url", "http://localhost:11434"))
         self._azure_endpoint.setText(s.value("api/azure_endpoint", ""))
-        self._azure_key.setText(s.value("api/azure_key", ""))
+        self._azure_key.setText(os.environ.get("AZURE_OPENAI_API_KEY", ""))
         self._azure_version.setText(s.value("api/azure_version", "2024-02-15-preview"))
 
         self._default_model.setCurrentText(s.value("model/default", "Mock / Demo"))
@@ -491,7 +486,7 @@ class SettingsPage(QWidget):
         self.theme_changed.emit(mapping.get(text, "dark"))
 
     def get_api_key(self, provider: str) -> str:
-        """Retrieve a stored API key."""
+        """Retrieve the current session's API key."""
         mapping = {
             "openai": self._openai_key.text(),
             "anthropic": self._anthropic_key.text(),

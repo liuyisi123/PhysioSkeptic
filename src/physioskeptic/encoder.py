@@ -1,6 +1,6 @@
 """PhysioPatch encoder: dual-path ECG/PPG encoder with SQI-gated fusion.
 
-Architecture overview (paper §3.1):
+Architecture overview:
   Path A — temporal:   beat patches → MultiScaleTokenizer (4-kernel 1D-CNN)
                        → 6-layer Transformer → H_temp ∈ R^{N×d}
   Path B — frequency:  STFT spectrogram → 2D-CNN → h_freq ∈ R^{128}
@@ -8,11 +8,8 @@ Architecture overview (paper §3.1):
   Fusion:              H_fused = q̂·H_temp + (1-q̂)·1_N (h_freq W_f)^T  [Eq. (3)]
   Cross-modal:         Q-Former projector with 32 learned queries
 
-Pre-training losses (paper §3.2):
-  L = L_reconstruct + 0.5·L_InfoNCE + 0.1·L_SQI
-  τ_contrastive = 0.07, queue = 4096
-  AdamW (β1=0.9, β2=0.999, wd=1e-4), cosine LR, 10K warmup, peak lr=3e-4,
-  200K steps, batch 512, 8×A100 80 GB.
+This module implements the encoder forward pass. Training and pretrained
+checkpoints are separate from this implementation; see docs/reproducibility.md.
 """
 from __future__ import annotations
 
@@ -41,7 +38,7 @@ class EncoderOutput:
 
 
 class MultiScaleTokenizer(nn.Module):
-    """Multi-scale 1D-CNN tokenizer for beat patches (Path A, paper §3.1).
+    """Multi-scale 1D-CNN tokenizer for beat patches (Path A).
 
     Applies parallel 1D convolutions with four kernel sizes, concatenates their
     mean-pooled feature maps, and projects to d_model. This captures morphological
@@ -77,7 +74,7 @@ class MultiScaleTokenizer(nn.Module):
 
 
 class FrequencyEncoder(nn.Module):
-    """2D-CNN encoder for STFT spectrograms (Path B, paper §3.1).
+    """2D-CNN encoder for STFT spectrograms (Path B).
 
     Processes spectrograms computed with W=256, H=64, N_FFT=512, filtered to
     0.5–30 Hz. Outputs a fixed-length frequency embedding h_freq ∈ R^{out_dim}.
@@ -107,14 +104,14 @@ class FrequencyEncoder(nn.Module):
 
 
 class QFormerProjector(nn.Module):
-    """Q-Former cross-modal projector with 32 learned queries (paper §3.1).
+    """Q-Former cross-modal projector with 32 learned queries.
 
     Adapts BLIP-2 Q-Former design: a fixed set of learned query vectors cross-attend
     to the fused beat token sequence H_fused to distill a compact cross-modal
     representation for LLM conditioning.
 
     Args:
-        n_queries: Number of learned query vectors (default 32, per paper).
+        n_queries: Number of learned query vectors (default 32).
         d_model: Token and query feature dimension.
         nhead: Number of attention heads.
     """
@@ -143,7 +140,7 @@ class QFormerProjector(nn.Module):
 class PhysioPatchEncoder(nn.Module):
     """Full PhysioPatch encoder combining Path A (temporal) and Path B (frequency).
 
-    Implements the dual-path architecture from paper §3.1:
+    Implements the dual-path architecture below:
       - Path A: MultiScaleTokenizer → 6-layer Transformer → H_temp (Eq. 1)
       - Path B: FrequencyEncoder → h_freq
       - SQI head: q̂ = σ(MLP(mean(H_temp)))  (Eq. 2)
@@ -154,8 +151,8 @@ class PhysioPatchEncoder(nn.Module):
     Args:
         d_model: Transformer hidden dimension d (default 256).
         freq_dim: Frequency embedding dimension (default 128, = dim of h_freq).
-        layers: Number of Transformer encoder layers (default 6, per paper).
-        n_queries: Number of Q-Former learned queries (default 32, per paper).
+        layers: Number of Transformer encoder layers (default 6).
+        n_queries: Number of Q-Former learned queries (default 32).
     """
 
     def __init__(

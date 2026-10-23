@@ -1,15 +1,16 @@
 """SQI-gated adaptive routing for the PhysioSkeptic debate pipeline.
 
-Implements the three-tier routing policy from paper §3.3:
+Implements the three-tier routing policy below:
   FAST:     c_0 > 0.90 AND q̂ > 0.80 AND conflict = ∅
   DEEP:     q̂ < 0.50  OR  c_0 < 0.60  OR  conflict = MAJOR
   STANDARD: all other cases
 
-Skeptic challenge count (paper §3.3, Eq. 5):
+Skeptic challenge count:
   n_chal = 3 - floor(2·q̂),  clipped to {1, 2, 3}
 
-Review flag: c_final < τ_rev = 0.70  (paper §3.3)
+Review flag: c_final < τ_rev = 0.70
 """
+
 from __future__ import annotations
 
 import math
@@ -19,7 +20,7 @@ from typing import Any
 
 
 class Route(str, Enum):
-    """Debate routing tier (paper §3.3)."""
+    """Debate routing tier."""
 
     FAST = "FAST"
     STANDARD = "STANDARD"
@@ -28,7 +29,7 @@ class Route(str, Enum):
 
 @dataclass(frozen=True)
 class RoutingConfig:
-    """Thresholds for the SQI-gated routing policy (paper §3.3).
+    """Thresholds for the SQI-gated routing policy.
 
     Attributes:
         fast_confidence: Minimum Proposer confidence c_0 for FAST routing (0.90).
@@ -41,6 +42,18 @@ class RoutingConfig:
     fast_quality: float = 0.80
     deep_quality: float = 0.50
     deep_confidence: float = 0.60
+
+    def __post_init__(self) -> None:
+        thresholds = (
+            self.fast_confidence,
+            self.fast_quality,
+            self.deep_quality,
+            self.deep_confidence,
+        )
+        if not all(math.isfinite(x) and 0 <= x <= 1 for x in thresholds):
+            raise ValueError("Routing thresholds must be finite values in [0, 1]")
+        if self.deep_confidence > self.fast_confidence or self.deep_quality > self.fast_quality:
+            raise ValueError("Deep thresholds cannot exceed the corresponding Fast thresholds")
 
 
 def has_major_conflict(checker_output: dict[str, Any] | None) -> bool:
@@ -63,7 +76,7 @@ def route_sample(
     checker_output: dict[str, Any] | None = None,
     cfg: RoutingConfig = RoutingConfig(),
 ) -> Route:
-    """Determine the debate routing tier for a single sample (paper §3.3).
+    """Determine the debate routing tier for a single sample.
 
     Priority order:
       1. FAST  if c_0 > fast_confidence AND q̂ > fast_quality AND conflict = ∅
@@ -79,6 +92,8 @@ def route_sample(
     Returns:
         Route enum value: FAST, STANDARD, or DEEP.
     """
+    if not all(math.isfinite(x) and 0 <= x <= 1 for x in (c0, q_hat)):
+        raise ValueError("Confidence and quality must be finite values in [0, 1]")
     conflict = has_major_conflict(checker_output)
     if c0 > cfg.fast_confidence and q_hat > cfg.fast_quality and not conflict:
         return Route.FAST
@@ -88,7 +103,7 @@ def route_sample(
 
 
 def challenge_count(q_hat: float) -> int:
-    """Compute Skeptic challenge count n_chal from SQI estimate (paper §3.3, Eq. 5).
+    """Compute Skeptic challenge count n_chal from SQI estimate.
 
     Formula: n_chal = 3 - floor(2·q̂),  clipped to {1, 2, 3}.
 
@@ -105,4 +120,6 @@ def challenge_count(q_hat: float) -> int:
     Returns:
         Integer challenge count in {1, 2, 3}.
     """
+    if not math.isfinite(q_hat) or not 0 <= q_hat <= 1:
+        raise ValueError("Quality must be a finite value in [0, 1]")
     return int(max(1, min(3, 3 - math.floor(2 * q_hat))))
