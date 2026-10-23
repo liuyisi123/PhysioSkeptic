@@ -178,22 +178,3 @@ environment. See
 [`docs/reproducibility.md`](docs/reproducibility.md) before running an
 evaluation.
 
-## Figures and manuscript
-
-The ICLR-27 LaTeX source, combined PDF, bibliography audit, and migration log
-are delivered separately from this software repository. This repository keeps
-only the executable contracts and synthetic demonstrations needed to inspect
-the method boundary.
-
-## Testing and release hygiene
-
-```powershell
-python -m pytest -q
-python -m build                 # optional package build
-git status --short
-```
-
-The tracked release contains source code, synthetic schemas/examples, prompts,
-tests, documentation, and UI assets. Evaluation outputs and model artifacts are
-kept outside the repository.
-
