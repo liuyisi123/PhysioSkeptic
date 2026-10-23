@@ -1,16 +1,14 @@
 """LLM client interfaces for the PhysioSkeptic debate pipeline.
 
-Only structured Patch Reports are sent to remote APIs. Raw ECG/PPG waveforms and
-protected health information must never leave the local environment.
-
-Paper §4.1 decoding settings:
-  model: gpt-5.2 (public alias, OpenAI API, ZDR endpoint)
-  T = 0.7, top_p = 1.0, JSON-only output, max context = 8192 tokens
+The mock client is executable offline. Provider integration is an extension
+point; the repository does not guarantee any provider's retention settings.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import json
+import re
 from typing import Any
 
 
@@ -87,28 +85,52 @@ class MockLLMClient(BaseLLMClient):
                 "rhythm": rhythm,
                 "confidence": conf,
                 "evidence": [
-                    {"report_field": "hr_ecg", "value": "see report", "interpretation": "rate evidence"},
-                    {"report_field": "rr_cv", "value": "see report", "interpretation": "regularity evidence"},
-                    {"report_field": "p_wave_ratio", "value": "see report", "interpretation": "sinus-origin evidence"},
+                    {
+                        "report_field": "hr_ecg",
+                        "value": "see report",
+                        "interpretation": "rate evidence",
+                    },
+                    {
+                        "report_field": "rr_cv",
+                        "value": "see report",
+                        "interpretation": "regularity evidence",
+                    },
+                    {
+                        "report_field": "p_wave_ratio",
+                        "value": "see report",
+                        "interpretation": "sinus-origin evidence",
+                    },
                 ],
             }
         if role == "Checker":
             severity = "MAJOR" if "rr_cv" in lower and "p_wave_ratio" in lower else "NONE"
             conflicts = (
-                [{"kind": "rhythm_morphology", "cited_fields": ["rr_cv", "p_wave_ratio"],
-                  "rationale": "irregular intervals with weak sinus support"}]
-                if severity == "MAJOR" else []
+                [
+                    {
+                        "kind": "rhythm_morphology",
+                        "cited_fields": ["rr_cv", "p_wave_ratio"],
+                        "rationale": "irregular intervals with weak sinus support",
+                    }
+                ]
+                if severity == "MAJOR"
+                else []
             )
             return {"role": "Checker", "severity": severity, "conflicts": conflicts}
         if role == "Skeptic":
-            n = 2 if "n_chal: 2" in user else 1
+            match = re.search(r"n_chal:\s*([123])\b", user)
+            n = int(match.group(1)) if match else 1
             return {
                 "role": "Skeptic",
                 "challenges": [
                     {
                         "target_evidence_index": i,
                         "strength": "strong",
-                        "cited_report_fields": ["low_confidence_beats", "q_hat", "rr_cv", "p_wave_ratio"],
+                        "cited_report_fields": [
+                            "low_confidence_beats",
+                            "q_hat",
+                            "rr_cv",
+                            "p_wave_ratio",
+                        ],
                         "alternative_interpretation": "AF_FAMILY may better explain irregularity and weak P-wave support.",
                     }
                     for i in range(n)
@@ -139,22 +161,11 @@ class MockLLMClient(BaseLLMClient):
 
 
 class OpenAICompatibleClient(BaseLLMClient):
-    """Client for the OpenAI-compatible JSON API (paper §4.1: gpt-5.2, ZDR endpoint).
-
-    Paper decoding settings: T=0.7, top_p=1.0, JSON-only output, max 8192 tokens.
-    Implement complete_json() with your authorized SDK. Log the model
-    snapshot (e.g., "gpt-5.2"), access date, prompt template hash, and sample ID
-    with every API call for reproducibility.
-
-    Args:
-        model: Model identifier string (paper uses "gpt-5.2").
-        api_key: API key string. Pass via environment variable in production.
-        base_url: Optional custom endpoint URL (ZDR endpoint for paper experiments).
-    """
+    """Extension interface for an explicitly configured provider integration."""
 
     def __init__(
         self,
-        model: str = "gpt-5.2",
+        model: str | None = None,
         api_key: str | None = None,
         base_url: str | None = None,
     ) -> None:
@@ -169,24 +180,8 @@ class OpenAICompatibleClient(BaseLLMClient):
         user: str,
         schema: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Send a structured prompt to the OpenAI-compatible endpoint.
-
-        This method must be implemented with your authorized API SDK
-        before running real evaluations. Decoding must use T=0.7, top_p=1.0,
-        JSON-mode output, and a fixed model snapshot.
-
-        Args:
-            role: Debate role name for response routing.
-            system: System instruction from the role's YAML template.
-            user: Formatted user message with Patch Report and role context.
-            schema: JSON Schema for response validation (enforce via API json_schema param).
-
-        Raises:
-            RuntimeError: Always, until implemented with an approved API SDK.
-        """
-        raise RuntimeError(
-            "OpenAICompatibleClient.complete_json() requires implementation with an "
-            "authorized OpenAI SDK. Set model='gpt-5.2', temperature=0.7, "
-            "top_p=1.0, response_format={'type': 'json_object'}, and log the model "
-            "snapshot, access date, and sample_id with every call."
+        """Raise until an authorized provider SDK integration is implemented."""
+        raise NotImplementedError(
+            "Implement a provider client with an explicit model revision and decoding settings. "
+            "Use MockLLMClient for the offline examples."
         )

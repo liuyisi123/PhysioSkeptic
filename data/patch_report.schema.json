@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PhysioSkeptic Patch Report",
-  "description": "Structured beat-level summary from the PhysioPatch encoder (paper §3.2). Contains SQI, per-beat confidence vector, HR, RR variability, P-wave ratio, LF/HF, and cross-modal consistency cues. Raw ECG/PPG waveforms are never included.",
+  "description": "Structured beat-level measurement summary. Contains SQI, per-beat confidence vector, HR, RR variability, P-wave ratio, LF/HF, and cross-modal consistency cues. Raw ECG/PPG waveforms are never included.",
   "type": "object",
   "required": ["sample_id", "q_hat", "beat_confidences", "hr_ecg", "hr_ppg", "rr_cv", "p_wave_ratio", "lf_hf", "low_confidence_beats", "cross_signal_consistency"],
   "properties": {
@@ -11,22 +11,22 @@
     },
     "fs": {
       "type": "number",
-      "description": "Sampling frequency in Hz (125 Hz per paper)."
+      "description": "Sampling frequency in Hz (125 Hz by default)."
     },
     "duration_sec": {
       "type": "number",
-      "description": "Signal duration in seconds (30 s per paper)."
+      "description": "Signal duration in seconds (30 s by default)."
     },
     "q_hat": {
       "type": "number",
       "minimum": 0,
       "maximum": 1,
-      "description": "Scalar SQI estimate q̂ ∈ [0,1] from the SQI head (Eq. 2). Used for FAST/DEEP routing."
+      "description": "Scalar quality value q̂ ∈ [0,1]; the public report builder uses signal heuristics. Used for FAST/DEEP routing."
     },
     "beat_confidences": {
       "type": "array",
       "items": {"type": "number", "minimum": 0, "maximum": 1},
-      "description": "Per-beat confidence vector c ∈ [0,1]^N (paper §3.2). Length equals the number of detected beats N."
+      "description": "Per-beat confidence vector c ∈ [0,1]^N. Length equals the number of detected beats N."
     },
     "hr_ecg": {
       "type": "number",
@@ -48,7 +48,7 @@
     },
     "lf_hf": {
       "type": "number",
-      "description": "PPG spectral LF/HF power ratio (autonomic balance indicator, 0.04–0.15 Hz / 0.15–0.40 Hz)."
+      "description": "PPG waveform spectral power ratio, 0.04–0.15 Hz / 0.15–0.40 Hz."
     },
     "low_confidence_beats": {
       "type": "array",
@@ -79,7 +79,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1,
-            "description": "Encoder attention weight (1 - c_i proxy)."
+            "description": "Low-confidence weighting proxy, 1 - c_i; not measured encoder attention."
           }
         }
       }

@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "physioskeptic"
 version = "0.1.0"
-description = "Signal-quality-anchored skeptical reasoning for ECG-PPG rhythm classification"
+description = "Measurement-referenced agent review of multimodal physiological signals"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-authors = [{name = "PhysioSkeptic Authors"}]
+authors = [{name = "Jian Liu", email = "jianliu@cuhk.edu.hk"}]
 dependencies = [
   "numpy>=1.24",
   "scipy>=1.10",
@@ -25,9 +25,16 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=7.4", "ruff>=0.3", "mypy>=1.8"]
 
+[project.urls]
+Repository = "https://github.com/liuyisi123/PhysioSkeptic"
+Issues = "https://github.com/liuyisi123/PhysioSkeptic/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.ruff]
 line-length = 100
 src = ["src", "scripts", "tests"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

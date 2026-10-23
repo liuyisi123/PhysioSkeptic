@@ -1,4 +1,4 @@
-"""Five-role PhysioSkeptic debate orchestration (paper §3.3).
+"""Five-role PhysioSkeptic debate orchestration.
 
 Role sequence and routing logic:
   FAST path:     Proposer → Checker → Arbiter
@@ -15,6 +15,7 @@ Review flag: c_final < τ_rev = 0.70
 
 All inter-role messages are structured JSON validated against role output schemas.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -23,9 +24,10 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from jsonschema import validate
 
 from .llm_clients import BaseLLMClient
-from .routing import Route, challenge_count, route_sample
+from .routing import Route, RoutingConfig, challenge_count, route_sample
 
 
 @dataclass
@@ -52,11 +54,11 @@ def load_prompt(path: str | Path) -> dict[str, Any]:
     Returns:
         Dict with keys: role, system, user_template, output_schema.
     """
-    return yaml.safe_load(Path(path).read_text())
+    return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
 
 
 class PhysioSkepticDebate:
-    """Orchestrator for the five-role PhysioSkeptic debate pipeline (paper §3.3).
+    """Orchestrator for the five-role PhysioSkeptic debate pipeline.
 
     Loads all role prompt templates at construction, then runs the full
     debate sequence for each sample according to the SQI-gated routing policy.
@@ -66,7 +68,7 @@ class PhysioSkepticDebate:
         prompt_dir: Directory containing role YAML files (proposer, checker,
                     skeptic, advocate, arbiter).
         review_threshold: Arbiter confidence threshold below which expert review
-                          is recommended (τ_rev = 0.70, paper §3.3).
+                          is recommended (τ_rev = 0.70).
     """
 
     def __init__(
@@ -74,10 +76,14 @@ class PhysioSkepticDebate:
         llm: BaseLLMClient,
         prompt_dir: str | Path,
         review_threshold: float = 0.70,
+        routing_config: RoutingConfig | None = None,
     ) -> None:
         self.llm = llm
         self.prompt_dir = Path(prompt_dir)
         self.review_threshold = review_threshold
+        if not 0 <= review_threshold <= 1:
+            raise ValueError("review_threshold must be between zero and one")
+        self.routing_config = routing_config or RoutingConfig()
         self.prompts = {p.stem: load_prompt(p) for p in self.prompt_dir.glob("*.yaml")}
 
     def _call(self, name: str, **kwargs: Any) -> dict[str, Any]:
@@ -92,14 +98,22 @@ class PhysioSkepticDebate:
         """
         tpl = self.prompts[name]
         user = tpl["user_template"].format(**kwargs)
-        return self.llm.complete_json(tpl["role"], tpl["system"], user, tpl.get("output_schema"))
+        system = tpl["system"].format(**kwargs)
+        schema = tpl.get("output_schema")
+        response = self.llm.complete_json(tpl["role"], system, user, schema)
+        json.dumps(response, allow_nan=False)
+        if schema:
+            validate(instance=response, schema=schema)
+        if name == "arbiter":
+            response["review_recommended"] = float(response["confidence"]) < self.review_threshold
+        return response
 
     def run(
         self,
         patch_report: dict[str, Any],
         classes: list[str] | None = None,
     ) -> DebateResult:
-        """Run the full five-role debate for one Patch Report (paper §3.3).
+        """Run the full five-role debate for one Patch Report.
 
         Args:
             patch_report: Validated Patch Report dict (from PatchReport.to_dict()).
@@ -117,8 +131,16 @@ class PhysioSkepticDebate:
         transcript.append(proposer)
 
         # Step 2: Checker audits cross-modal consistency; routing is decided here
-        checker = self._call("checker", proposer_output=json.dumps(proposer), patch_report=report_str)
-        depth = route_sample(float(proposer["confidence"]), float(patch_report["q_hat"]), checker)
+        checker = self._call(
+            "checker", proposer_output=json.dumps(proposer), patch_report=report_str
+        )
+        transcript.append(checker)
+        depth = route_sample(
+            float(proposer["confidence"]),
+            float(patch_report["q_hat"]),
+            checker,
+            self.routing_config,
+        )
 
         # FAST path: skip Skeptic and Advocate, go directly to Arbiter
         if depth == Route.FAST:
@@ -132,7 +154,6 @@ class PhysioSkepticDebate:
             return DebateResult(depth, transcript, final)
 
         # STANDARD and DEEP: Skeptic issues n_chal targeted challenges (Eq. 5)
-        transcript.append(checker)
         n_chal = challenge_count(float(patch_report["q_hat"]))
         skeptic = self._call(
             "skeptic",

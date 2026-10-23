@@ -28,7 +28,7 @@ def main() -> None:
     app.setApplicationDisplayName("PhysioSkeptic")
     app.setOrganizationName("PhysioSkeptic")
     app.setOrganizationDomain("physioskeptic.ai")
-    app.setApplicationVersion("1.0.0")
+    app.setApplicationVersion("0.1.0")
 
     app.setStyleSheet(get_stylesheet())
 

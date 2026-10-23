@@ -71,7 +71,7 @@ def detect_ppg_onsets(ppg: np.ndarray, fs: int = 125) -> np.ndarray:
     """Detect PPG systolic-onset sample indices via prominent peak detection.
 
     Identifies the systolic upstroke peaks after bandpass filtering. Used as a
-    proxy for systolic onsets as described in paper §3.1 (PhysioPatch encoder).
+    proxy for systolic onsets in the public demonstration.
 
     Args:
         ppg: 1-D PPG signal (expected length 3750 for 30 s at 125 Hz).
@@ -90,7 +90,7 @@ def detect_ppg_onsets(ppg: np.ndarray, fs: int = 125) -> np.ndarray:
 def make_beat_patches(x: np.ndarray, peaks: np.ndarray, fs: int = 125) -> BeatPatches:
     """Create one beat-aligned, right-padded patch per detected beat.
 
-    Implements the PhysioPatch patching strategy from paper §3.1: each patch
+    Implements the PhysioPatch patching strategy below: each patch
     starts at the R-peak (or systolic onset), extends Δ samples to the right,
     and is zero-padded on the right if the signal ends before Δ samples.
     Δ = min inter-beat interval, clipped to [0.35 s, 1.5 s] at 125 Hz.
@@ -165,7 +165,7 @@ def spectral_lf_hf(x: np.ndarray, fs: int = 125) -> float:
 
     LF band: 0.04–0.15 Hz (sympathetic/parasympathetic modulation).
     HF band: 0.15–0.40 Hz (respiratory/parasympathetic modulation).
-    Reported as a Patch Report field (paper §3.2).
+    Reported as a Patch Report field.
 
     Args:
         x: 1-D PPG signal.

@@ -50,8 +50,8 @@ student:
   delta_attention: 0.2
 llm:
   backend: mock
-  model: gpt-5.2  # public alias used in paper experiments (OpenAI ZDR endpoint)
-  temperature: 0.7  # T=0.7 as reported in paper §4 decoding settings
+  model: null  # Set an exact model revision when implementing a provider client.
+  temperature: 0.7
   top_p: 1.0
   max_context_tokens: 8192
   json_only: true

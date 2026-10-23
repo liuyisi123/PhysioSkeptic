@@ -1,15 +1,16 @@
 """Deterministic Patch Report generation for PhysioSkeptic.
 
-The Patch Report is a structured JSON summary (paper §3.2) that routes signal
+The Patch Report is a structured JSON summary  that routes signal
 quality and beat-level evidence to the five-role LLM debate without transmitting
 raw waveforms.  Fields:
   - q̂ ∈ [0, 1]                 — scalar SQI for FAST/DEEP routing
   - c ∈ [0, 1]^N               — per-beat confidence vector
   - low-confidence beats        — (index, time window, attention weight) for beats where c_i < 0.40
   - ECG P-wave detection ratio  — sinus-origin proxy
-  - LF/HF ratio                 — spectral autonomic indicator from PPG
+  - LF/HF ratio                 — PPG waveform spectral ratio
   - cross-modal consistency     — HR difference, rhythm-morphology conflict flag
 """
+
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
@@ -39,7 +40,7 @@ class LowConfidenceBeat:
         beat_index: Zero-based index into the per-beat confidence vector.
         time_window_sec: (start_sec, end_sec) of the patch in signal time.
         confidence: Beat-level confidence c_i ∈ [0, 1].
-        attention: Attention weight assigned by the encoder (1 - c_i proxy).
+        attention: Low-confidence weighting proxy, 1 - c_i.
     """
 
     beat_index: int
@@ -50,19 +51,19 @@ class LowConfidenceBeat:
 
 @dataclass
 class PatchReport:
-    """Full Patch Report (paper §3.2) for a single 30-second ECG/PPG window.
+    """Full Patch Report  for a single 30-second ECG/PPG window.
 
     Attributes:
         sample_id: Unique identifier for this window.
-        fs: Sampling frequency in Hz (125 Hz per paper).
-        duration_sec: Signal duration in seconds (30 s per paper).
+        fs: Sampling frequency in Hz (125 Hz by default).
+        duration_sec: Signal duration in seconds (30 s by default).
         q_hat: Scalar SQI estimate q̂ ∈ [0, 1] used for routing.
         beat_confidences: Per-beat confidence vector c ∈ [0, 1]^N.
         hr_ecg: Heart rate estimated from ECG R-peaks (bpm).
         hr_ppg: Heart rate estimated from PPG systolic onsets (bpm).
         rr_cv: RR-interval coefficient of variation (dimensionless).
         p_wave_ratio: Fraction of beats with detectable P-wave energy (sinus proxy).
-        lf_hf: PPG spectral LF/HF ratio (autonomic balance indicator).
+        lf_hf: PPG waveform spectral LF/HF ratio.
         low_confidence_beats: Beats where c_i < 0.40 (index, window, attention).
         cross_signal_consistency: Dict with hr_diff_bpm, rhythm_morphology_conflict,
             confidence_quality_mismatch flags.
@@ -84,9 +85,11 @@ class PatchReport:
     patch_descriptors: list[str]
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize to a JSON-compatible dict (validates against patch_report.schema.json)."""
+        """Serialize to JSON-compatible values; validate separately with the schema."""
         d = asdict(self)
         d["low_confidence_beats"] = [asdict(b) for b in self.low_confidence_beats]
+        for beat in d["low_confidence_beats"]:
+            beat["time_window_sec"] = list(beat["time_window_sec"])
         return d
 
     def to_json(self) -> str:
@@ -99,7 +102,7 @@ def estimate_p_wave_ratio(ecg_patches: np.ndarray) -> float:
 
     Computes a sinus-origin proxy based on pre-QRS energy in each beat patch.
     The manuscript uses ECG-derived P-wave detection; this heuristic provides a
-    stable, dependency-free approximation for the public release.
+    heuristic feature for the public demonstration.
 
     A beat is counted as having P-wave support when its pre-QRS standard deviation
     exceeds 10% of the beat's overall standard deviation.
@@ -113,14 +116,16 @@ def estimate_p_wave_ratio(ecg_patches: np.ndarray) -> float:
     if ecg_patches.size == 0:
         return 0.0
     n = ecg_patches.shape[1]
-    pre = ecg_patches[:, max(0, n // 2 - n // 5): max(1, n // 2 - n // 12)]
+    pre = ecg_patches[:, max(0, n // 2 - n // 5) : max(1, n // 2 - n // 12)]
     whole = ecg_patches
     ratio = np.mean(np.std(pre, axis=1) > 0.10 * (np.std(whole, axis=1) + 1e-8))
     return float(np.clip(ratio, 0.0, 1.0))
 
 
-def build_patch_report(sample_id: str, ecg: np.ndarray, ppg: np.ndarray, fs: int = 125) -> PatchReport:
-    """Build a Patch Report from a 30-second ECG/PPG window (paper §3.2).
+def build_patch_report(
+    sample_id: str, ecg: np.ndarray, ppg: np.ndarray, fs: int = 125
+) -> PatchReport:
+    """Build a Patch Report from a 30-second ECG/PPG window.
 
     Processing pipeline:
       1. R-peak detection (Pan-Tompkins) and PPG systolic-onset detection.
@@ -155,7 +160,7 @@ def build_patch_report(sample_id: str, ecg: np.ndarray, ppg: np.ndarray, fs: int
     p_wave = estimate_p_wave_ratio(ecg_bp.patches)
     lf_hf = spectral_lf_hf(ppg, fs)
 
-    # Per-beat confidence vector c ∈ [0, 1]^N  (paper §3.2)
+    # Per-beat confidence vector c ∈ [0, 1]^N
     beat_conf: list[float] = []
     for seg in ecg_bp.patches:
         conf = float(np.clip(0.5 * q_hat + 0.5 * robust_quality(seg), 0.0, 1.0))
@@ -183,9 +188,9 @@ def build_patch_report(sample_id: str, ecg: np.ndarray, ppg: np.ndarray, fs: int
     consistency: dict[str, Any] = {
         "hr_diff_bpm": hr_diff,
         "rhythm_morphology_conflict": rhythm_morphology_conflict,
-        "confidence_quality_mismatch": bool(
-            np.mean(beat_conf) > 0.80 and q_hat < 0.50
-        ) if beat_conf else False,
+        "confidence_quality_mismatch": bool(np.mean(beat_conf) > 0.80 and q_hat < 0.50)
+        if beat_conf
+        else False,
     }
 
     descriptors: list[str] = []
@@ -227,5 +232,17 @@ def validate_patch_report(report: dict[str, Any], schema_path: str | Path) -> No
     Raises:
         jsonschema.ValidationError: If the report does not conform to the schema.
     """
-    schema = json.loads(Path(schema_path).read_text())
+    schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
     validate(instance=report, schema=schema)
+
+    def check_finite(value: Any) -> None:
+        if isinstance(value, dict):
+            for item in value.values():
+                check_finite(item)
+        elif isinstance(value, (list, tuple)):
+            for item in value:
+                check_finite(item)
+        elif isinstance(value, (float, int)) and not np.isfinite(value):
+            raise ValueError("Patch Report numeric fields must be finite")
+
+    check_finite(report)

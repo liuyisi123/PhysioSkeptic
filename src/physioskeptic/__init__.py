@@ -1,10 +1,10 @@
 """PhysioSkeptic: signal-quality-anchored skeptical reasoning for ECG/PPG rhythm diagnosis.
 
 Public API surface:
-  - PhysioPatchEncoder: dual-path encoder (paper §3.1)
-  - build_patch_report: deterministic Patch Report generation (paper §3.2)
-  - route_sample, challenge_count: SQI-gated routing (paper §3.3)
-  - PhysioSkepticDebate: five-role debate orchestration (paper §3.3)
+  - PhysioPatchEncoder: dual-path encoder
+  - build_patch_report: deterministic Patch Report generation
+  - route_sample, challenge_count: SQI-gated routing
+  - PhysioSkepticDebate: five-role debate orchestration
   - BaseLLMClient, MockLLMClient, OpenAICompatibleClient: LLM backends
 """
 from physioskeptic.debate import PhysioSkepticDebate
