@@ -1,10 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="190" viewBox="0 0 760 190" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="220" viewBox="0 0 1000 220" role="img" aria-labelledby="title desc">
   <title id="title">PhysioSkeptic</title>
-  <desc id="desc">Evidence-grounded rhythm reasoning</desc>
-  <rect width="760" height="190" rx="28" fill="#f5faf9"/>
-  <rect x="34" y="32" width="126" height="126" rx="30" fill="#0e948d"/>
-  <path d="M49 96h23l12-35 18 68 19-53 10 20h29" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="138" cy="54" r="11" fill="#f28a63" stroke="#ffffff" stroke-width="4"/>
-  <text x="194" y="88" fill="#0b314d" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" letter-spacing="2">PHYSIOSKEPTIC</text>
-  <text x="198" y="126" fill="#0e948d" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="4">EVIDENCE-GROUNDED RHYTHM REASONING</text>
+  <desc id="desc">Physiological interpretation with language model agents. A stylised waveform identifies the physiological signal setting.</desc>
+  <rect x="1" y="1" width="998" height="218" rx="18" fill="#F7F6F2" stroke="#E4E3DE"/>
+  <rect x="42" y="48" width="124" height="124" rx="25" fill="#657F88"/>
+  <path d="M56 112h23l11-32 17 62 19-48 11 18h17" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="149" cy="64" r="10" fill="#986576" stroke="#F7F6F2" stroke-width="4"/>
+  <text x="207" y="106" fill="#263B4A" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5">PhysioSkeptic</text>
+  <text x="210" y="147" fill="#5D6C77" font-family="Arial, Helvetica, sans-serif" font-size="23">Physiological interpretation with language model agents</text>
+  <path d="M899 55v110" stroke="#DAD8D3" stroke-width="1"/>
+  <rect x="926" y="65" width="19" height="19" rx="4" fill="#718B82"/>
+  <rect x="926" y="100" width="19" height="19" rx="4" fill="#9B8BA8"/>
+  <rect x="926" y="135" width="19" height="19" rx="4" fill="#986576"/>
 </svg>

@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible problem with the code or documentation.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: Please use synthetic inputs and remove credentials or patient information from logs.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Expected and observed behaviour
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps or minimal example
+      description: Include the command, relevant configuration and a synthetic input example.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Python version, operating system, package versions and checkout revision.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error message
+      render: text
