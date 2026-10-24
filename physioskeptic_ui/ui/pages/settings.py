@@ -367,10 +367,6 @@ class SettingsPage(QWidget):
         <p>The pipeline employs five specialized AI agents — Proposer, Checker, Skeptic,
         Advocate, and Arbiter — to reduce overconfidence and improve calibration in
         automated arrhythmia detection.</p>
-        <h4>Citation</h4>
-        <p>If you use PhysioSkeptic in your research, please cite:<br/>
-        <code>[Anonymous, "PhysioSkeptic: Signal-Quality-Anchored Skeptical Reasoning
-        for Robust ECG–PPG Rhythm Diagnosis", AAAI 2027]</code></p>
         <h4>License</h4>
         <p>MIT License — see GitHub repository for details.</p>
         """)
@@ -382,14 +378,9 @@ class SettingsPage(QWidget):
         links_row = QHBoxLayout()
         btn_gh = QPushButton("GitHub Repository")
         btn_gh.clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl("https://github.com/physioskeptic"))
-        )
-        btn_paper = QPushButton("Paper (NeurIPS 2026)")
-        btn_paper.clicked.connect(
-            lambda: QDesktopServices.openUrl(QUrl("https://arxiv.org/abs/2026.00000"))
+            lambda: QDesktopServices.openUrl(QUrl("https://github.com/liuyisi123/PhysioSkeptic"))
         )
         links_row.addWidget(btn_gh)
-        links_row.addWidget(btn_paper)
         links_row.addStretch()
         lay.addLayout(links_row)
         lay.addStretch()
