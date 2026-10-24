@@ -9,7 +9,7 @@ description = "Measurement-referenced agent review of multimodal physiological s
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-authors = [{name = "Jian Liu", email = "jianliu@cuhk.edu.hk"}]
+authors = [{name = "PhysioSkeptic Contributors"}]
 dependencies = [
   "numpy>=1.24",
   "scipy>=1.10",

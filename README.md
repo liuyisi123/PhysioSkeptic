@@ -152,8 +152,5 @@ Run `python -m pytest -q` before submitting a change. See
 report software problems through [GitHub Issues](https://github.com/liuyisi123/PhysioSkeptic/issues)
 without including patient records or credentials.
 
-Research contact: Jian Liu, Faculty of Medicine, The Chinese University of Hong Kong
-([jianliu@cuhk.edu.hk](mailto:jianliu@cuhk.edu.hk)).
-
 The source code is distributed under the [MIT License](LICENSE). Dataset and
 third-party model terms apply separately.
