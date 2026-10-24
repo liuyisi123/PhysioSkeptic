@@ -7,8 +7,4 @@
   <circle cx="149" cy="64" r="10" fill="#986576" stroke="#F7F6F2" stroke-width="4"/>
   <text x="207" y="106" fill="#263B4A" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" letter-spacing="-1.5">PhysioSkeptic</text>
   <text x="210" y="147" fill="#5D6C77" font-family="Arial, Helvetica, sans-serif" font-size="23">Physiological interpretation with language model agents</text>
-  <path d="M899 55v110" stroke="#DAD8D3" stroke-width="1"/>
-  <rect x="926" y="65" width="19" height="19" rx="4" fill="#718B82"/>
-  <rect x="926" y="100" width="19" height="19" rx="4" fill="#9B8BA8"/>
-  <rect x="926" y="135" width="19" height="19" rx="4" fill="#986576"/>
 </svg>
