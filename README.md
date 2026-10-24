@@ -5,10 +5,6 @@
 <h3 align="center">Interpreting multimodal physiological signals through sceptical reasoning with language model agents</h3>
 
 <p align="center">
-  Jian Liu · Faculty of Medicine, The Chinese University of Hong Kong
-</p>
-
-<p align="center">
   <a href="https://github.com/liuyisi123/PhysioSkeptic/actions/workflows/tests.yml"><img src="https://github.com/liuyisi123/PhysioSkeptic/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests"></a>
   <a href="pyproject.toml"><img src="https://img.shields.io/badge/Python-3.10%2B-657B8C?logo=python&logoColor=white" alt="Python 3.10 or newer"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-718B82" alt="MIT license"></a>
@@ -203,4 +199,3 @@ physioskeptic_ui/   Optional desktop interface
 </details>
 
 For software questions, [open an issue](https://github.com/liuyisi123/PhysioSkeptic/issues).
-For research enquiries, contact [Jian Liu](mailto:jianliu@cuhk.edu.hk).

@@ -9,7 +9,7 @@ description = "Physiological signal interpretation with quality-aware language m
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-authors = [{name = "Jian Liu", email = "jianliu@cuhk.edu.hk"}]
+authors = [{name = "PhysioSkeptic Contributors"}]
 dependencies = [
   "numpy>=1.24",
   "scipy>=1.10",

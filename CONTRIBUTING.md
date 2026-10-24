@@ -12,9 +12,8 @@ based on `data/sample_patch_report.json` is preferable to a private dataset.
 Remove credentials, patient information and private provider responses before
 attaching logs or screenshots.
 
-For manuscript or study-design enquiries, contact
-[Jian Liu](mailto:jianliu@cuhk.edu.hk). Public GitHub issues are for reproducible
-software questions and documentation changes.
+Public GitHub issues are for reproducible software questions and documentation
+changes.
 
 ## Proposing a change
 
